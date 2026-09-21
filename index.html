@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>레고 악성코드 디버깅 미니게임</title>
+  <title>레고 악성코드 디버깅 - 통합판</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,6 +24,17 @@
       --block-unrevealed: #FFD500;
       --block-revealed: #FFFFFF;
       --block-virus: #D152A7;
+
+      /* 숫자별 고유 레고 색상 */
+      --num-0: #888888;
+      --num-1: #006CB7;
+      --num-2: #00852B;
+      --num-3: #E3000B;
+      --num-4: #8E24AA;
+      --num-5: #FF8800;
+      --num-6: #1A237E;
+      --num-7: #D152A7;
+      --num-8: #6D4C41;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,18 +49,18 @@
       color: #222;
       font-family: var(--font-lego);
       line-height: 1.5;
-      padding: 25px 10px;
+      padding: 20px 10px;
       min-height: 100vh;
     }
 
     .game-container {
-      max-width: 520px;
+      max-width: 950px;
       margin: 0 auto;
       background-color: var(--lego-card);
       border: 8px solid var(--lego-red);
       border-radius: 20px;
       box-shadow: 0 12px 0 #9E0007, 0 20px 25px rgba(0,0,0,0.3);
-      padding: 25px 20px;
+      padding: 20px;
       text-align: center;
       position: relative;
     }
@@ -58,19 +69,19 @@
       display: inline-block;
       background-color: var(--lego-red);
       color: var(--lego-yellow);
-      font-size: 2.1rem;
-      padding: 8px 25px;
+      font-size: 2rem;
+      padding: 6px 20px;
       border-radius: 12px;
       border: 4px solid #FFF;
       box-shadow: 0 5px 0 #9E0007, 0 5px 10px rgba(0,0,0,0.2);
       text-shadow: 2px 2px 0px #000;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       letter-spacing: 1px;
     }
 
     .hero-title .virus-icon {
       display: inline-block;
-      font-size: 2.3rem;
+      font-size: 2.2rem;
       animation: bounce 1.2s infinite alternate ease-in-out;
     }
 
@@ -82,10 +93,10 @@
     .rule-box {
       background-color: #FFF3C4;
       border: 3px dashed var(--lego-blue);
-      padding: 12px 15px;
+      padding: 10px 15px;
       border-radius: 12px;
-      font-size: 1.05rem;
-      margin-bottom: 18px;
+      font-size: 1rem;
+      margin-bottom: 15px;
       text-align: left;
       font-family: var(--font-body);
       font-weight: 500;
@@ -93,17 +104,28 @@
 
     .rule-box strong {
       font-family: var(--font-lego);
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       color: var(--lego-blue);
     }
 
     .accessibility-panel {
-      font-size: 1rem;
-      margin-bottom: 15px;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
       display: flex;
       justify-content: center;
       gap: 20px;
       font-family: var(--font-body);
+    }
+
+    .turn-banner {
+      background-color: var(--lego-yellow);
+      color: #000;
+      border: 3px solid var(--lego-red);
+      border-radius: 10px;
+      padding: 6px;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      display: none;
     }
 
     .dashboard {
@@ -114,30 +136,30 @@
       color: #FFF;
       border: 4px solid #004A7F;
       border-radius: 15px;
-      padding: 12px;
-      margin-bottom: 18px;
-      font-size: 1.25rem;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
       box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2);
     }
 
     .status-text {
       color: var(--lego-yellow);
       text-shadow: 1px 1px 0 #000;
-      font-size: 1.35rem;
+      font-size: 1.3rem;
     }
 
     .controls {
       display: flex;
       gap: 10px;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       flex-wrap: wrap;
     }
 
     .lego-btn {
       font-family: var(--font-lego);
-      font-size: 1.15rem;
-      padding: 10px 18px;
+      font-size: 1.1rem;
+      padding: 8px 16px;
       border-radius: 10px;
       border: 3px solid #FFF;
       cursor: pointer;
@@ -146,35 +168,53 @@
       transition: transform 0.1s;
     }
 
-    .btn-start { background-color: var(--lego-green); box-shadow: 0 5px 0 #00521A; }
-    .btn-pause { background-color: #FF8800; box-shadow: 0 5px 0 #B35F00; }
-    .btn-reset { background-color: #666; box-shadow: 0 5px 0 #333; }
+    .btn-home { background-color: #006CB7; box-shadow: 0 4px 0 #004A7F; }
+    .btn-mode { background-color: #FF8800; box-shadow: 0 4px 0 #B35F00; }
+    .btn-start { background-color: var(--lego-green); box-shadow: 0 4px 0 #00521A; }
+    .btn-match { background-color: #8E24AA; box-shadow: 0 4px 0 #4A148C; }
+    .btn-pause { background-color: #00852B; box-shadow: 0 4px 0 #00521A; }
+    .btn-reset { background-color: #666; box-shadow: 0 4px 0 #333; }
 
     .lego-btn:active {
-      transform: translateY(4px);
+      transform: translateY(3px);
       box-shadow: 0 1px 0 #000 !important;
+    }
+
+    .grid-wrapper {
+      overflow-x: auto;
+      margin-bottom: 15px;
+      padding-bottom: 5px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      max-width: 380px;
-      margin: 0 auto 20px auto;
+      gap: 3px;
+      justify-content: center;
       background-color: var(--lego-green);
-      padding: 15px;
-      border-radius: 16px;
-      border: 5px solid #00521A;
-      box-shadow: inset 0 6px 0 rgba(255,255,255,0.3), 0 8px 0 #003B13;
+      padding: 10px;
+      border-radius: 12px;
+      border: 4px solid #00521A;
+      box-shadow: inset 0 4px 0 rgba(255,255,255,0.3), 0 6px 0 #003B13;
+      width: fit-content;
+      margin: 0 auto;
+    }
+
+    .grid.mode-easy {
+      grid-template-columns: repeat(5, 50px);
+      grid-template-rows: repeat(5, 50px);
+      gap: 8px;
+    }
+
+    .grid.mode-expert {
+      grid-template-columns: repeat(30, 26px);
+      grid-template-rows: repeat(16, 26px);
+      gap: 3px;
     }
 
     .cell {
-      width: 100%;
-      aspect-ratio: 1;
       background-color: var(--block-unrevealed);
-      border: 3px solid #D6B200;
-      border-radius: 12px;
-      font-size: 1.6rem;
+      border: 2px solid #D6B200;
+      border-radius: 5px;
       font-weight: bold;
       display: flex;
       justify-content: center;
@@ -182,63 +222,64 @@
       cursor: pointer;
       user-select: none;
       position: relative;
-      box-shadow: 0 6px 0 #B89900, inset 0 3px 0 rgba(255,255,255,0.8);
-      transition: all 0.15s ease;
-      color: #222;
+      box-shadow: 0 3px 0 #B89900, inset 0 2px 0 rgba(255,255,255,0.8);
+      transition: all 0.1s ease;
     }
+
+    .grid.mode-easy .cell { font-size: 1.6rem; border-radius: 10px; }
+    .grid.mode-expert .cell { font-size: 0.95rem; }
 
     .cell::before {
       content: '';
       position: absolute;
-      width: 40%;
-      height: 40%;
+      width: 35%;
+      height: 35%;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.4);
-      border: 2px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.08);
       top: 10%;
-      box-shadow: inset 0 2px 2px rgba(255,255,255,0.9);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.9);
     }
 
-    .cell:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.05);
-    }
+    .cell:hover { filter: brightness(1.05); }
 
     .cell.revealed {
       background-color: var(--block-revealed);
       border-color: #CCC;
-      box-shadow: inset 0 3px 5px rgba(0,0,0,0.15);
-      transform: translateY(4px);
+      box-shadow: inset 0 2px 3px rgba(0,0,0,0.15);
+      transform: translateY(2px);
     }
 
-    .cell.revealed::before {
-      display: none;
-    }
+    .cell.revealed::before { display: none; }
+
+    .cell.num-0 { color: var(--num-0); }
+    .cell.num-1 { color: var(--num-1); }
+    .cell.num-2 { color: var(--num-2); }
+    .cell.num-3 { color: var(--num-3); }
+    .cell.num-4 { color: var(--num-4); }
+    .cell.num-5 { color: var(--num-5); }
+    .cell.num-6 { color: var(--num-6); }
+    .cell.num-7 { color: var(--num-7); }
+    .cell.num-8 { color: var(--num-8); }
 
     .cell.virus {
       background-color: var(--block-virus) !important;
       border-color: #9C2E7A !important;
-      box-shadow: 0 0 15px #D152A7, inset 0 3px 0 rgba(255,255,255,0.6) !important;
-      animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    @keyframes pop {
-      0% { transform: scale(0.5); }
-      100% { transform: scale(1); }
+      box-shadow: 0 0 10px #D152A7, inset 0 2px 0 rgba(255,255,255,0.6) !important;
     }
 
     .high-score {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       color: var(--lego-blue);
       border-top: 3px dashed #D6CBB5;
-      padding-top: 12px;
+      padding-top: 10px;
     }
 
-    /* 중앙 결과 팝업 모달 스타일 */
+    /* 팝업 모달 기본 구조 */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.75);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -258,16 +299,28 @@
       border: 6px solid var(--lego-blue);
       border-radius: 20px;
       padding: 25px 30px;
-      max-width: 380px;
+      max-width: 450px;
       width: 90%;
       text-align: center;
       box-shadow: 0 10px 0 #004A7F, 0 15px 30px rgba(0,0,0,0.5);
       transform: scale(0.8);
       transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
     }
 
-    .modal-overlay.active .modal-content {
-      transform: scale(1);
+    .modal-overlay.active .modal-content { transform: scale(1); }
+
+    /* 팝업 우측 상단 X 닫기 버튼 */
+    .modal-close-x {
+      position: absolute;
+      top: 12px; right: 15px;
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      font-family: var(--font-lego);
+      color: var(--lego-red);
+      cursor: pointer;
+      line-height: 1;
     }
 
     .modal-title {
@@ -278,9 +331,85 @@
     }
 
     .modal-desc {
-      font-size: 1.2rem;
-      margin-bottom: 20px;
+      font-size: 1.15rem;
+      margin-bottom: 15px;
       color: #333;
+    }
+
+    .modal-btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    .difficulty-select-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .difficulty-btn {
+      font-size: 1.2rem;
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .match-setup-group {
+      text-align: left;
+      margin-bottom: 12px;
+      font-family: var(--font-body);
+    }
+
+    .match-setup-group label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .match-setup-group input, .match-setup-group select {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 2px solid var(--lego-blue);
+      font-family: var(--font-body);
+    }
+
+    .nickname-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 180px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+
+    .ranking-list {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 20px;
+      font-family: var(--font-body);
+    }
+
+    .ranking-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #FFF;
+      border: 2px solid var(--lego-blue);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 1.05rem;
+    }
+
+    .ranking-item:nth-child(1) {
+      background-color: #FFF9C4;
+      border-color: #FBC02D;
+      color: #D84315;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -295,12 +424,12 @@
 
   <div class="game-container">
     <div class="hero-title">
-      <span class="virus-icon">👾</span> 레고 디버깅 <span class="virus-icon">👾</span>
+      <span class="virus-icon">👾</span> 레고 악성코드 디버깅 <span class="virus-icon">👾</span>
     </div>
     
-    <div class="rule-box">
-      <p><strong>🧱 미션:</strong> 제한시간 30초 안에 악성 바이러스(👾)가 숨겨진 블록을 피해 <strong>정상 블록 20개</strong>를 정화하세요!</p>
-      <p><strong>🎮 조작법:</strong> 블록 좌클릭(검사), 우클릭(바이러스 👾 깃발 표시)</p>
+    <div class="rule-box" id="rule-box">
+      <p><strong>🧱 미션:</strong> 제한시간 안에 바이러스(👾)를 피해 모든 안전 블록을 정화하세요!</p>
+      <p><strong>🎮 조작법:</strong> 좌클릭(검사), 우클릭(👾 표시), 양클릭/휠클릭(연쇄 오프닝)</p>
     </div>
 
     <div class="accessibility-panel">
@@ -308,91 +437,218 @@
       <label><input type="checkbox" id="toggle-sound"> 효과음 끄기</label>
     </div>
 
+    <div id="turn-banner" class="turn-banner">
+      🏆 <span id="current-player-name">플레이어 1</span> 님의 차례입니다!
+    </div>
+
     <div class="dashboard">
-      <div>⏱️ <span id="timer">30</span>초</div>
+      <div>⏱️ <span id="timer">00:00</span></div>
       <div id="game-status" class="status-text">READY!</div>
-      <div>🛡️ <span id="cleared-count">0</span> / 20</div>
+      <div>🛡️ 정화: <span id="cleared-count">0</span> / <span id="max-safe-count">0</span></div>
     </div>
 
     <div class="controls">
-      <button id="btn-start" class="lego-btn btn-start">▶️ 게임 시작 / 재시작</button>
+      <button id="btn-change-diff" class="lego-btn btn-mode">⚙️ 난이도 선택</button>
+      <button id="btn-start" class="lego-btn btn-start">▶️ 싱글 모드 시작</button>
+      <button id="btn-match-mode" class="lego-btn btn-match">🎯 1~4인 내기 모드</button>
       <button id="btn-pause" class="lego-btn btn-pause">⏸️ 일시정지</button>
       <button id="btn-reset-data" class="lego-btn btn-reset">🔄 기록 초기화</button>
     </div>
 
-    <div class="grid" id="grid" role="grid" aria-label="레고 블록 디버깅 격자"></div>
+    <div class="grid-wrapper">
+      <div class="grid mode-expert" id="grid" role="grid" aria-label="레고 블록 디버깅 격자"></div>
+    </div>
 
     <div class="high-score">
-      🏆 최고 성공 기록: <span id="best-score">기록 없음</span>
+      🏆 <span id="diff-label-text">고급형</span> 최고 성공 기록: <span id="best-score">기록 없음</span>
     </div>
   </div>
 
-  <!-- 중앙 결과 팝업 모달 -->
+  <!-- 1. 첫 화면 난이도 선택 모달 -->
+  <div class="modal-overlay active" id="diff-select-modal">
+    <div class="modal-content">
+      <button class="modal-close-x" onclick="closeModal(diffSelectModal)" title="닫기">✖</button>
+      <div class="modal-title">🎮 난이도 선택</div>
+      <p class="modal-desc">원하시는 난이도를 선택해 주세요!</p>
+      <div class="difficulty-select-btns">
+        <button class="lego-btn btn-start difficulty-btn" id="btn-select-easy">
+          ⚡ 초급 모드 (5×5 격자 / 30초 / 바이러스 5개)
+        </button>
+        <button class="lego-btn btn-match difficulty-btn" id="btn-select-expert">
+          🧩 고급 모드 (16×30 격자 / 8분 / 바이러스 99개)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 한 판 종료 결과 팝업 -->
   <div class="modal-overlay" id="result-modal">
     <div class="modal-content">
+      <button class="modal-close-x" onclick="closeModal(resultModal)" title="닫기">✖</button>
       <div class="modal-title" id="modal-title">🎉 CLEARED!</div>
-      <div class="modal-desc" id="modal-desc">남은 시간: 15초</div>
-      <button class="lego-btn btn-start" id="btn-modal-restart">▶️ 다시 도전하기</button>
+      <div class="modal-desc" id="modal-desc">남은 시간: 05:20</div>
+      <div class="modal-btn-group">
+        <button class="lego-btn btn-start" id="btn-modal-restart">▶️ 다음 진행하기</button>
+        <button class="lego-btn btn-home" id="btn-result-home">🏠 메인으로</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 내기 모드 다음 플레이어 전환 안내 팝업 -->
+  <div class="modal-overlay" id="next-player-modal">
+    <div class="modal-content">
+      <button class="modal-close-x" onclick="closeModal(nextPlayerModal)" title="닫기">✖</button>
+      <div class="modal-title" id="next-player-title">🎲 차례 안내</div>
+      <div class="modal-desc" id="next-player-desc">OO 님 시작하겠습니다. 준비되셨나요?</div>
+      <div class="modal-btn-group">
+        <button class="lego-btn btn-start" id="btn-start-next-player">▶️ 게임 시작하기</button>
+        <button class="lego-btn btn-home" id="btn-next-home">🏠 메인으로</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 내기 모드 설정 모달 -->
+  <div class="modal-overlay" id="match-setup-modal">
+    <div class="modal-content">
+      <button class="modal-close-x" onclick="closeModal(matchSetupModal)" title="닫기">✖</button>
+      <div class="modal-title">🎯 내기 모드 설정</div>
+      <div class="match-setup-group">
+        <label>참여 인원 선택 (1~4명):</label>
+        <select id="player-count-select">
+          <option value="1">1명</option>
+          <option value="2" selected>2명</option>
+          <option value="3">3명</option>
+          <option value="4">4명</option>
+        </select>
+      </div>
+      <div class="match-setup-group">
+        <label>플레이어 닉네임 입력:</label>
+        <div class="nickname-inputs" id="nickname-inputs-container"></div>
+      </div>
+      <div class="modal-btn-group">
+        <button class="lego-btn btn-match" id="btn-start-match">🚀 내기 게임 시작!</button>
+        <button class="lego-btn btn-reset" onclick="closeModal(matchSetupModal)">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 내기 모드 최종 종합 순위 모달 -->
+  <div class="modal-overlay" id="match-final-modal">
+    <div class="modal-content">
+      <button class="modal-close-x" onclick="closeModal(matchFinalModal)" title="닫기">✖</button>
+      <div class="modal-title">🏆 최종 내기 결과 🏆</div>
+      <p class="modal-desc">모든 플레이어의 게임이 끝났습니다!</p>
+      <ul class="ranking-list" id="ranking-list"></ul>
+      <button class="lego-btn btn-start" id="btn-close-final">확인 (메인으로)</button>
     </div>
   </div>
 
   <script>
-    const BOARD_SIZE = 5;
-    const VIRUS_COUNT = 5;
-    const SAFE_COUNT = (BOARD_SIZE * BOARD_SIZE) - VIRUS_COUNT; // 20
-    const TIME_LIMIT = 30; // 30초 제한시간
+    const PRESETS = {
+      EASY: { name: '초급형', rows: 5, cols: 5, virus: 5, time: 30, key: 'security_game_best_easy' },
+      EXPERT: { name: '고급형', rows: 16, cols: 30, virus: 99, time: 480, key: 'security_game_best_expert' }
+    };
+
+    let currentDiff = PRESETS.EXPERT;
 
     let board = [];
     let revealedCount = 0;
-    let timeLeft = TIME_LIMIT;
+    let timeLeft = 0;
     let timerId = null;
     let gameState = 'READY';
+
+    let isMatchMode = false;
+    let matchPlayers = []; 
+    let currentMatchIndex = 0;
 
     const gridEl = document.getElementById('grid');
     const timerEl = document.getElementById('timer');
     const statusEl = document.getElementById('game-status');
     const clearedEl = document.getElementById('cleared-count');
+    const maxSafeCountEl = document.getElementById('max-safe-count');
     const bestScoreEl = document.getElementById('best-score');
+    const diffLabelText = document.getElementById('diff-label-text');
     
+    const turnBanner = document.getElementById('turn-banner');
+    const currentPlayerNameEl = document.getElementById('current-player-name');
+
+    const btnChangeDiff = document.getElementById('btn-change-diff');
     const btnStart = document.getElementById('btn-start');
+    const btnMatchMode = document.getElementById('btn-match-mode');
     const btnPause = document.getElementById('btn-pause');
     const btnResetData = document.getElementById('btn-reset-data');
 
-    // 모달 관련 요소
-    const modalEl = document.getElementById('result-modal');
-    const modalTitleEl = document.getElementById('modal-title');
-    const modalDescEl = document.getElementById('modal-desc');
+    // 모달 요소들
+    const diffSelectModal = document.getElementById('diff-select-modal');
+    const btnSelectEasy = document.getElementById('btn-select-easy');
+    const btnSelectExpert = document.getElementById('btn-select-expert');
+
+    const resultModal = document.getElementById('result-modal');
     const btnModalRestart = document.getElementById('btn-modal-restart');
+    const btnResultHome = document.getElementById('btn-result-home');
+
+    const nextPlayerModal = document.getElementById('next-player-modal');
+    const nextPlayerTitleEl = document.getElementById('next-player-title');
+    const nextPlayerDescEl = document.getElementById('next-player-desc');
+    const btnStartNextPlayer = document.getElementById('btn-start-next-player');
+    const btnNextHome = document.getElementById('btn-next-home');
+
+    const matchSetupModal = document.getElementById('match-setup-modal');
+    const playerCountSelect = document.getElementById('player-count-select');
+    const nicknameInputsContainer = document.getElementById('nickname-inputs-container');
+    const btnStartMatch = document.getElementById('btn-start-match');
+
+    const matchFinalModal = document.getElementById('match-final-modal');
+    const rankingList = document.getElementById('ranking-list');
+    const btnCloseFinal = document.getElementById('btn-close-final');
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const s = (seconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
 
     function loadHighScore() {
       try {
-        const saved = localStorage.getItem('security_game_best');
+        const saved = localStorage.getItem(currentDiff.key);
         if (!saved) return '기록 없음';
         const parsed = JSON.parse(saved);
         if (typeof parsed.time === 'number') {
-          return `${parsed.time}초 남기고 성공!`;
+          return `${formatTime(parsed.time)} 남기고 성공!`;
         }
         throw new Error('손상 데이터');
       } catch (e) {
-        localStorage.removeItem('security_game_best');
+        localStorage.removeItem(currentDiff.key);
         return '기록 없음';
       }
     }
 
     function saveHighScore(time) {
       try {
-        const currentBest = localStorage.getItem('security_game_best');
+        const currentBest = localStorage.getItem(currentDiff.key);
         let currentBestTime = -1;
         if (currentBest) {
           currentBestTime = JSON.parse(currentBest).time || -1;
         }
         if (time > currentBestTime) {
-          localStorage.setItem('security_game_best', JSON.stringify({ time: time }));
-          bestScoreEl.textContent = `${time}초 남기고 성공!`;
+          localStorage.setItem(currentDiff.key, JSON.stringify({ time: time }));
+          bestScoreEl.textContent = `${formatTime(time)} 남기고 성공!`;
         }
       } catch (e) {
         console.warn('저장 실패:', e);
       }
+    }
+
+    function applyDifficulty(preset) {
+      currentDiff = preset;
+      diffLabelText.textContent = preset.name;
+      
+      gridEl.className = 'grid ' + (preset === PRESETS.EASY ? 'mode-easy' : 'mode-expert');
+      const safeCount = (preset.rows * preset.cols) - preset.virus;
+      maxSafeCountEl.textContent = safeCount;
+
+      bestScoreEl.textContent = loadHighScore();
+      initBoard();
     }
 
     function initBoard() {
@@ -400,33 +656,36 @@
       board = [];
       revealedCount = 0;
       clearedEl.textContent = revealedCount;
-      closeModal();
+      closeModal(resultModal);
 
-      for (let r = 0; r < BOARD_SIZE; r++) {
+      const R = currentDiff.rows;
+      const C = currentDiff.cols;
+
+      for (let r = 0; r < R; r++) {
         board[r] = [];
-        for (let c = 0; c < BOARD_SIZE; c++) {
+        for (let c = 0; c < C; c++) {
           board[r][c] = { r, c, isVirus: false, revealed: false, flagged: false, count: 0 };
         }
       }
 
       let placed = 0;
-      while (placed < VIRUS_COUNT) {
-        let r = Math.floor(Math.random() * BOARD_SIZE);
-        let c = Math.floor(Math.random() * BOARD_SIZE);
+      while (placed < currentDiff.virus) {
+        let r = Math.floor(Math.random() * R);
+        let c = Math.floor(Math.random() * C);
         if (!board[r][c].isVirus) {
           board[r][c].isVirus = true;
           placed++;
         }
       }
 
-      for (let r = 0; r < BOARD_SIZE; r++) {
-        for (let c = 0; c < BOARD_SIZE; c++) {
+      for (let r = 0; r < R; r++) {
+        for (let c = 0; c < C; c++) {
           if (!board[r][c].isVirus) {
             let count = 0;
             for (let dr = -1; dr <= 1; dr++) {
               for (let dc = -1; dc <= 1; dc++) {
                 let nr = r + dr, nc = c + dc;
-                if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && board[nr][nc].isVirus) {
+                if (nr >= 0 && nr < R && nc >= 0 && nc < C && board[nr][nc].isVirus) {
                   count++;
                 }
               }
@@ -436,18 +695,15 @@
         }
       }
 
-      for (let r = 0; r < BOARD_SIZE; r++) {
-        for (let c = 0; c < BOARD_SIZE; c++) {
+      for (let r = 0; r < R; r++) {
+        for (let c = 0; c < C; c++) {
           const cellEl = document.createElement('div');
           cellEl.className = 'cell';
           cellEl.dataset.r = r;
           cellEl.dataset.c = c;
           
-          cellEl.addEventListener('click', () => handleCellClick(r, c));
-          cellEl.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            handleCellRightClick(r, c);
-          });
+          cellEl.addEventListener('mousedown', (e) => handleMouseDown(e, r, c));
+          cellEl.addEventListener('contextmenu', (e) => e.preventDefault());
           gridEl.appendChild(cellEl);
         }
       }
@@ -456,8 +712,8 @@
     function startGame() {
       clearInterval(timerId);
       initBoard();
-      timeLeft = TIME_LIMIT;
-      timerEl.textContent = timeLeft;
+      timeLeft = currentDiff.time;
+      timerEl.textContent = formatTime(timeLeft);
       gameState = 'PLAYING';
       statusEl.textContent = 'PLAYING!';
       statusEl.style.color = '#FFD500';
@@ -465,7 +721,7 @@
       timerId = setInterval(() => {
         if (gameState === 'PLAYING') {
           timeLeft--;
-          timerEl.textContent = timeLeft;
+          timerEl.textContent = formatTime(timeLeft);
           if (timeLeft <= 0) {
             endGame(false, 'TIME OVER!');
           }
@@ -473,26 +729,50 @@
       }, 1000);
     }
 
+    function revealCell(r, c) {
+      const R = currentDiff.rows;
+      const C = currentDiff.cols;
+
+      if (r < 0 || r >= R || c < 0 || c >= C) return;
+      const cell = board[r][c];
+      if (cell.revealed || cell.flagged) return;
+
+      cell.revealed = true;
+      revealedCount++;
+      const cellEl = gridEl.children[r * C + c];
+      
+      cellEl.classList.add('revealed', `num-${cell.count}`);
+      cellEl.textContent = cell.count;
+
+      if (cell.count === 0) {
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            if (dr !== 0 || dc !== 0) {
+              revealCell(r + dr, c + dc);
+            }
+          }
+        }
+      }
+    }
+
     function handleCellClick(r, c) {
       if (gameState !== 'PLAYING') return;
       const cell = board[r][c];
       if (cell.revealed || cell.flagged) return;
 
-      cell.revealed = true;
-      const cellEl = gridEl.children[r * BOARD_SIZE + c];
-      cellEl.classList.add('revealed');
+      const safeTotal = (currentDiff.rows * currentDiff.cols) - currentDiff.virus;
 
       if (cell.isVirus) {
-        cellEl.classList.add('virus');
+        cell.revealed = true;
+        const cellEl = gridEl.children[r * currentDiff.cols + c];
+        cellEl.classList.add('revealed', 'virus');
         cellEl.textContent = '👾';
         endGame(false, 'VIRUS EXPLODE!');
       } else {
-        revealedCount++;
+        revealCell(r, c);
         clearedEl.textContent = revealedCount;
-        // 변경사항: 숫자 0도 공백 대신 '0'으로 명시적 표시
-        cellEl.textContent = cell.count;
         
-        if (revealedCount === SAFE_COUNT) {
+        if (revealedCount === safeTotal) {
           endGame(true, 'CLEARED! 🎉');
         }
       }
@@ -504,8 +784,47 @@
       if (cell.revealed) return;
 
       cell.flagged = !cell.flagged;
-      const cellEl = gridEl.children[r * BOARD_SIZE + c];
+      const cellEl = gridEl.children[r * currentDiff.cols + c];
       cellEl.textContent = cell.flagged ? '👾' : '';
+    }
+
+    function handleMouseDown(e, r, c) {
+      if (gameState !== 'PLAYING') return;
+      if (e.buttons === 3 || e.button === 1) {
+        handleChording(r, c);
+      } else if (e.button === 0) {
+        handleCellClick(r, c);
+      } else if (e.button === 2) {
+        handleCellRightClick(r, c);
+      }
+    }
+
+    function handleChording(r, c) {
+      const R = currentDiff.rows;
+      const C = currentDiff.cols;
+      const cell = board[r][c];
+      if (!cell.revealed || cell.count === 0) return;
+
+      let flaggedCount = 0;
+      let unrevealedNeighbors = [];
+
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          let nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
+            if (board[nr][nc].flagged) flaggedCount++;
+            if (!board[nr][nc].revealed && !board[nr][nc].flagged) {
+              unrevealedNeighbors.push({ r: nr, c: nc });
+            }
+          }
+        }
+      }
+
+      if (flaggedCount === cell.count) {
+        unrevealedNeighbors.forEach(n => {
+          handleCellClick(n.r, n.c);
+        });
+      }
     }
 
     function endGame(isWin, message) {
@@ -514,36 +833,189 @@
       statusEl.textContent = message;
       statusEl.style.color = isWin ? '#00FF66' : '#FFD500';
 
+      const R = currentDiff.rows;
+      const C = currentDiff.cols;
+
       if (isWin) {
         saveHighScore(timeLeft);
-        showModal('🎉 성공 축하합니다!', `남은 시간: ${timeLeft}초`);
       } else {
-        for (let r = 0; r < BOARD_SIZE; r++) {
-          for (let c = 0; c < BOARD_SIZE; c++) {
+        for (let r = 0; r < R; r++) {
+          for (let c = 0; c < C; c++) {
             if (board[r][c].isVirus) {
-              const cellEl = gridEl.children[r * BOARD_SIZE + c];
-              cellEl.classList.add('virus');
+              const cellEl = gridEl.children[r * C + c];
+              cellEl.classList.add('revealed', 'virus');
               cellEl.textContent = '👾';
             }
           }
         }
-        if (message === 'TIME OVER!') {
-          showModal('⏱️ TIME OVER!', '30초 제한시간이 초과되었습니다.');
+      }
+
+      if (isMatchMode) {
+        matchPlayers[currentMatchIndex].scoreTime = isWin ? timeLeft : 0;
+        matchPlayers[currentMatchIndex].cleared = revealedCount;
+        matchPlayers[currentMatchIndex].win = isWin;
+
+        const pName = matchPlayers[currentMatchIndex].name;
+        const resText = isWin ? `성공! (남은시간: ${formatTime(timeLeft)})` : `실패! (정화 칸수: ${revealedCount}개)`;
+        showModal(resultModal, `🎮 ${pName} 님 결과`, resText);
+      } else {
+        if (isWin) {
+          showModal(resultModal, '🎉 클리어 성공!', `남은 시간: ${formatTime(timeLeft)}`);
         } else {
-          showModal('💥 감염되었습니다!', '바이러스 블록을 터뜨렸습니다.');
+          showModal(resultModal, message === 'TIME OVER!' ? '⏱️ TIME OVER!' : '💥 감염되었습니다!', '다시 도전해 보세요.');
         }
       }
     }
 
-    function showModal(title, desc) {
-      modalTitleEl.textContent = title;
-      modalDescEl.textContent = desc;
-      modalEl.classList.add('active');
+    // 모달 관리 이벤트
+    btnSelectEasy.addEventListener('click', () => {
+      applyDifficulty(PRESETS.EASY);
+      closeModal(diffSelectModal);
+    });
+
+    btnSelectExpert.addEventListener('click', () => {
+      applyDifficulty(PRESETS.EXPERT);
+      closeModal(diffSelectModal);
+    });
+
+    btnChangeDiff.addEventListener('click', () => {
+      openModal(diffSelectModal);
+    });
+
+    function renderNicknameInputs() {
+      const count = parseInt(playerCountSelect.value);
+      nicknameInputsContainer.innerHTML = '';
+      for (let i = 1; i <= count; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = `플레이어 ${i} 닉네임`;
+        input.value = `플레이어 ${i}`;
+        input.dataset.idx = i;
+        nicknameInputsContainer.appendChild(input);
+      }
     }
 
-    function closeModal() {
-      modalEl.classList.remove('active');
+    playerCountSelect.addEventListener('change', renderNicknameInputs);
+
+    btnMatchMode.addEventListener('click', () => {
+      renderNicknameInputs();
+      openModal(matchSetupModal);
+    });
+
+    btnStartMatch.addEventListener('click', () => {
+      const inputs = nicknameInputsContainer.querySelectorAll('input');
+      matchPlayers = [];
+      inputs.forEach((inp, idx) => {
+        matchPlayers.push({
+          name: inp.value.trim() || `플레이어 ${idx + 1}`,
+          scoreTime: 0,
+          cleared: 0,
+          win: false
+        });
+      });
+
+      isMatchMode = true;
+      currentMatchIndex = 0;
+      closeModal(matchSetupModal);
+      turnBanner.style.display = 'block';
+
+      showNextPlayerPrompt();
+    });
+
+    btnModalRestart.addEventListener('click', () => {
+      closeModal(resultModal);
+
+      if (isMatchMode) {
+        currentMatchIndex++;
+        if (currentMatchIndex < matchPlayers.length) {
+          showNextPlayerPrompt();
+        } else {
+          showFinalRankings();
+        }
+      } else {
+        startGame();
+      }
+    });
+
+    function showNextPlayerPrompt() {
+      const nextName = matchPlayers[currentMatchIndex].name;
+      currentPlayerNameEl.textContent = nextName;
+      nextPlayerTitleEl.textContent = `🎲 ${nextName} 님의 차례`;
+      nextPlayerDescEl.textContent = `${nextName} 님 시작하겠습니다. 준비되셨나요?`;
+      openModal(nextPlayerModal);
     }
+
+    btnStartNextPlayer.addEventListener('click', () => {
+      closeModal(nextPlayerModal);
+      startGame();
+    });
+
+    // 메인으로/홈으로 가기 버튼 기능들
+    btnResultHome.addEventListener('click', () => {
+      closeModal(resultModal);
+      goHome();
+    });
+
+    btnNextHome.addEventListener('click', () => {
+      closeModal(nextPlayerModal);
+      goHome();
+    });
+
+    function goHome() {
+      isMatchMode = false;
+      turnBanner.style.display = 'none';
+      openModal(diffSelectModal);
+    }
+
+    function showFinalRankings() {
+      matchPlayers.sort((a, b) => {
+        if (a.win !== b.win) return b.win - a.win;
+        if (a.win) return b.scoreTime - a.scoreTime;
+        return b.cleared - a.cleared;
+      });
+
+      rankingList.innerHTML = '';
+      matchPlayers.forEach((p, idx) => {
+        const li = document.createElement('li');
+        li.className = 'ranking-item';
+        const rankMedal = idx === 0 ? '🥇 1위' : (idx === 1 ? '🥈 2위' : (idx === 2 ? '🥉 3위' : `${idx + 1}위`));
+        const scoreStr = p.win ? `성공 (${formatTime(p.scoreTime)})` : `실패 (${p.cleared}칸 정화)`;
+        li.innerHTML = `<span>${rankMedal} : ${p.name}</span> <span>${scoreStr}</span>`;
+        rankingList.appendChild(li);
+      });
+
+      openModal(matchFinalModal);
+    }
+
+    btnCloseFinal.addEventListener('click', () => {
+      closeModal(matchFinalModal);
+      goHome();
+    });
+
+    // 키보드 Esc 키 입력 시 활성화된 모달 닫기
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        const activeModals = document.querySelectorAll('.modal-overlay.active');
+        activeModals.forEach(modal => closeModal(modal));
+      }
+    });
+
+    function showModal(modalEl, title, desc) {
+      const t = modalEl.querySelector('.modal-title');
+      const d = modalEl.querySelector('.modal-desc');
+      if (t) t.textContent = title;
+      if (d) d.textContent = desc;
+      openModal(modalEl);
+    }
+
+    function openModal(el) { el.classList.add('active'); }
+    function closeModal(el) { el.classList.remove('active'); }
+
+    btnStart.addEventListener('click', () => {
+      isMatchMode = false;
+      turnBanner.style.display = 'none';
+      startGame();
+    });
 
     btnPause.addEventListener('click', () => {
       if (gameState === 'PLAYING') {
@@ -562,15 +1034,12 @@
       }
     });
 
-    btnStart.addEventListener('click', startGame);
-    btnModalRestart.addEventListener('click', startGame);
     btnResetData.addEventListener('click', () => {
-      localStorage.removeItem('security_game_best');
+      localStorage.removeItem(currentDiff.key);
       bestScoreEl.textContent = loadHighScore();
     });
 
-    bestScoreEl.textContent = loadHighScore();
-    initBoard();
+    applyDifficulty(PRESETS.EXPERT);
   </script>
 </body>
 </html>
