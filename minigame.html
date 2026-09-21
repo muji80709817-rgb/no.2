@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>레고 악성코드 디버깅 미니게임</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --font-lego: 'Jua', sans-serif;
+      --font-body: 'Noto Sans KR', sans-serif;
+      
+      --lego-red: #E3000B;
+      --lego-yellow: #FFD500;
+      --lego-blue: #006CB7;
+      --lego-green: #00852B;
+      --lego-bg: #EAE3D2;
+      --lego-card: #FFFAF0;
+      
+      --block-unrevealed: #FFD500;
+      --block-revealed: #FFFFFF;
+      --block-virus: #D152A7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--lego-bg);
+      background-image: 
+        radial-gradient(rgba(0, 0, 0, 0.12) 18%, transparent 18%),
+        radial-gradient(rgba(255, 255, 255, 0.6) 18%, transparent 18%);
+      background-position: 0 0, 10px 10px;
+      background-size: 20px 20px;
+      color: #222;
+      font-family: var(--font-lego);
+      line-height: 1.5;
+      padding: 25px 10px;
+      min-height: 100vh;
+    }
+
+    .game-container {
+      max-width: 520px;
+      margin: 0 auto;
+      background-color: var(--lego-card);
+      border: 8px solid var(--lego-red);
+      border-radius: 20px;
+      box-shadow: 0 12px 0 #9E0007, 0 20px 25px rgba(0,0,0,0.3);
+      padding: 25px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-title {
+      display: inline-block;
+      background-color: var(--lego-red);
+      color: var(--lego-yellow);
+      font-size: 2.1rem;
+      padding: 8px 25px;
+      border-radius: 12px;
+      border: 4px solid #FFF;
+      box-shadow: 0 5px 0 #9E0007, 0 5px 10px rgba(0,0,0,0.2);
+      text-shadow: 2px 2px 0px #000;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+    }
+
+    .hero-title .virus-icon {
+      display: inline-block;
+      font-size: 2.3rem;
+      animation: bounce 1.2s infinite alternate ease-in-out;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-8px); }
+    }
+
+    .rule-box {
+      background-color: #FFF3C4;
+      border: 3px dashed var(--lego-blue);
+      padding: 12px 15px;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      margin-bottom: 18px;
+      text-align: left;
+      font-family: var(--font-body);
+      font-weight: 500;
+    }
+
+    .rule-box strong {
+      font-family: var(--font-lego);
+      font-size: 1.15rem;
+      color: var(--lego-blue);
+    }
+
+    .accessibility-panel {
+      font-size: 1rem;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      font-family: var(--font-body);
+    }
+
+    .dashboard {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background-color: var(--lego-blue);
+      color: #FFF;
+      border: 4px solid #004A7F;
+      border-radius: 15px;
+      padding: 12px;
+      margin-bottom: 18px;
+      font-size: 1.25rem;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2);
+    }
+
+    .status-text {
+      color: var(--lego-yellow);
+      text-shadow: 1px 1px 0 #000;
+      font-size: 1.35rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .lego-btn {
+      font-family: var(--font-lego);
+      font-size: 1.15rem;
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 3px solid #FFF;
+      cursor: pointer;
+      color: #FFF;
+      text-shadow: 1px 1px 0 #000;
+      transition: transform 0.1s;
+    }
+
+    .btn-start { background-color: var(--lego-green); box-shadow: 0 5px 0 #00521A; }
+    .btn-pause { background-color: #FF8800; box-shadow: 0 5px 0 #B35F00; }
+    .btn-reset { background-color: #666; box-shadow: 0 5px 0 #333; }
+
+    .lego-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #000 !important;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      max-width: 380px;
+      margin: 0 auto 20px auto;
+      background-color: var(--lego-green);
+      padding: 15px;
+      border-radius: 16px;
+      border: 5px solid #00521A;
+      box-shadow: inset 0 6px 0 rgba(255,255,255,0.3), 0 8px 0 #003B13;
+    }
+
+    .cell {
+      width: 100%;
+      aspect-ratio: 1;
+      background-color: var(--block-unrevealed);
+      border: 3px solid #D6B200;
+      border-radius: 12px;
+      font-size: 1.6rem;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      box-shadow: 0 6px 0 #B89900, inset 0 3px 0 rgba(255,255,255,0.8);
+      transition: all 0.15s ease;
+      color: #222;
+    }
+
+    .cell::before {
+      content: '';
+      position: absolute;
+      width: 40%;
+      height: 40%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      border: 2px solid rgba(0, 0, 0, 0.08);
+      top: 10%;
+      box-shadow: inset 0 2px 2px rgba(255,255,255,0.9);
+    }
+
+    .cell:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .cell.revealed {
+      background-color: var(--block-revealed);
+      border-color: #CCC;
+      box-shadow: inset 0 3px 5px rgba(0,0,0,0.15);
+      transform: translateY(4px);
+    }
+
+    .cell.revealed::before {
+      display: none;
+    }
+
+    .cell.virus {
+      background-color: var(--block-virus) !important;
+      border-color: #9C2E7A !important;
+      box-shadow: 0 0 15px #D152A7, inset 0 3px 0 rgba(255,255,255,0.6) !important;
+      animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.5); }
+      100% { transform: scale(1); }
+    }
+
+    .high-score {
+      font-size: 1.15rem;
+      color: var(--lego-blue);
+      border-top: 3px dashed #D6CBB5;
+      padding-top: 12px;
+    }
+
+    /* 중앙 결과 팝업 모달 스타일 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background-color: var(--lego-card);
+      border: 6px solid var(--lego-blue);
+      border-radius: 20px;
+      padding: 25px 30px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 0 #004A7F, 0 15px 30px rgba(0,0,0,0.5);
+      transform: scale(0.8);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-title {
+      font-size: 2rem;
+      color: var(--lego-red);
+      margin-bottom: 10px;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    .modal-desc {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cell, .hero-title .virus-icon, .modal-overlay, .modal-content { 
+        animation: none !important; 
+        transition: none !important; 
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <div class="hero-title">
+      <span class="virus-icon">👾</span> 레고 디버깅 <span class="virus-icon">👾</span>
+    </div>
+    
+    <div class="rule-box">
+      <p><strong>🧱 미션:</strong> 제한시간 30초 안에 악성 바이러스(👾)가 숨겨진 블록을 피해 <strong>정상 블록 20개</strong>를 정화하세요!</p>
+      <p><strong>🎮 조작법:</strong> 블록 좌클릭(검사), 우클릭(바이러스 👾 깃발 표시)</p>
+    </div>
+
+    <div class="accessibility-panel">
+      <label><input type="checkbox" id="toggle-motion"> 움직임 줄이기</label>
+      <label><input type="checkbox" id="toggle-sound"> 효과음 끄기</label>
+    </div>
+
+    <div class="dashboard">
+      <div>⏱️ <span id="timer">30</span>초</div>
+      <div id="game-status" class="status-text">READY!</div>
+      <div>🛡️ <span id="cleared-count">0</span> / 20</div>
+    </div>
+
+    <div class="controls">
+      <button id="btn-start" class="lego-btn btn-start">▶️ 게임 시작 / 재시작</button>
+      <button id="btn-pause" class="lego-btn btn-pause">⏸️ 일시정지</button>
+      <button id="btn-reset-data" class="lego-btn btn-reset">🔄 기록 초기화</button>
+    </div>
+
+    <div class="grid" id="grid" role="grid" aria-label="레고 블록 디버깅 격자"></div>
+
+    <div class="high-score">
+      🏆 최고 성공 기록: <span id="best-score">기록 없음</span>
+    </div>
+  </div>
+
+  <!-- 중앙 결과 팝업 모달 -->
+  <div class="modal-overlay" id="result-modal">
+    <div class="modal-content">
+      <div class="modal-title" id="modal-title">🎉 CLEARED!</div>
+      <div class="modal-desc" id="modal-desc">남은 시간: 15초</div>
+      <button class="lego-btn btn-start" id="btn-modal-restart">▶️ 다시 도전하기</button>
+    </div>
+  </div>
+
+  <script>
+    const BOARD_SIZE = 5;
+    const VIRUS_COUNT = 5;
+    const SAFE_COUNT = (BOARD_SIZE * BOARD_SIZE) - VIRUS_COUNT; // 20
+    const TIME_LIMIT = 30; // 30초 제한시간
+
+    let board = [];
+    let revealedCount = 0;
+    let timeLeft = TIME_LIMIT;
+    let timerId = null;
+    let gameState = 'READY';
+
+    const gridEl = document.getElementById('grid');
+    const timerEl = document.getElementById('timer');
+    const statusEl = document.getElementById('game-status');
+    const clearedEl = document.getElementById('cleared-count');
+    const bestScoreEl = document.getElementById('best-score');
+    
+    const btnStart = document.getElementById('btn-start');
+    const btnPause = document.getElementById('btn-pause');
+    const btnResetData = document.getElementById('btn-reset-data');
+
+    // 모달 관련 요소
+    const modalEl = document.getElementById('result-modal');
+    const modalTitleEl = document.getElementById('modal-title');
+    const modalDescEl = document.getElementById('modal-desc');
+    const btnModalRestart = document.getElementById('btn-modal-restart');
+
+    function loadHighScore() {
+      try {
+        const saved = localStorage.getItem('security_game_best');
+        if (!saved) return '기록 없음';
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.time === 'number') {
+          return `${parsed.time}초 남기고 성공!`;
+        }
+        throw new Error('손상 데이터');
+      } catch (e) {
+        localStorage.removeItem('security_game_best');
+        return '기록 없음';
+      }
+    }
+
+    function saveHighScore(time) {
+      try {
+        const currentBest = localStorage.getItem('security_game_best');
+        let currentBestTime = -1;
+        if (currentBest) {
+          currentBestTime = JSON.parse(currentBest).time || -1;
+        }
+        if (time > currentBestTime) {
+          localStorage.setItem('security_game_best', JSON.stringify({ time: time }));
+          bestScoreEl.textContent = `${time}초 남기고 성공!`;
+        }
+      } catch (e) {
+        console.warn('저장 실패:', e);
+      }
+    }
+
+    function initBoard() {
+      gridEl.innerHTML = '';
+      board = [];
+      revealedCount = 0;
+      clearedEl.textContent = revealedCount;
+      closeModal();
+
+      for (let r = 0; r < BOARD_SIZE; r++) {
+        board[r] = [];
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          board[r][c] = { r, c, isVirus: false, revealed: false, flagged: false, count: 0 };
+        }
+      }
+
+      let placed = 0;
+      while (placed < VIRUS_COUNT) {
+        let r = Math.floor(Math.random() * BOARD_SIZE);
+        let c = Math.floor(Math.random() * BOARD_SIZE);
+        if (!board[r][c].isVirus) {
+          board[r][c].isVirus = true;
+          placed++;
+        }
+      }
+
+      for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          if (!board[r][c].isVirus) {
+            let count = 0;
+            for (let dr = -1; dr <= 1; dr++) {
+              for (let dc = -1; dc <= 1; dc++) {
+                let nr = r + dr, nc = c + dc;
+                if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && board[nr][nc].isVirus) {
+                  count++;
+                }
+              }
+            }
+            board[r][c].count = count;
+          }
+        }
+      }
+
+      for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          const cellEl = document.createElement('div');
+          cellEl.className = 'cell';
+          cellEl.dataset.r = r;
+          cellEl.dataset.c = c;
+          
+          cellEl.addEventListener('click', () => handleCellClick(r, c));
+          cellEl.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            handleCellRightClick(r, c);
+          });
+          gridEl.appendChild(cellEl);
+        }
+      }
+    }
+
+    function startGame() {
+      clearInterval(timerId);
+      initBoard();
+      timeLeft = TIME_LIMIT;
+      timerEl.textContent = timeLeft;
+      gameState = 'PLAYING';
+      statusEl.textContent = 'PLAYING!';
+      statusEl.style.color = '#FFD500';
+
+      timerId = setInterval(() => {
+        if (gameState === 'PLAYING') {
+          timeLeft--;
+          timerEl.textContent = timeLeft;
+          if (timeLeft <= 0) {
+            endGame(false, 'TIME OVER!');
+          }
+        }
+      }, 1000);
+    }
+
+    function handleCellClick(r, c) {
+      if (gameState !== 'PLAYING') return;
+      const cell = board[r][c];
+      if (cell.revealed || cell.flagged) return;
+
+      cell.revealed = true;
+      const cellEl = gridEl.children[r * BOARD_SIZE + c];
+      cellEl.classList.add('revealed');
+
+      if (cell.isVirus) {
+        cellEl.classList.add('virus');
+        cellEl.textContent = '👾';
+        endGame(false, 'VIRUS EXPLODE!');
+      } else {
+        revealedCount++;
+        clearedEl.textContent = revealedCount;
+        // 변경사항: 숫자 0도 공백 대신 '0'으로 명시적 표시
+        cellEl.textContent = cell.count;
+        
+        if (revealedCount === SAFE_COUNT) {
+          endGame(true, 'CLEARED! 🎉');
+        }
+      }
+    }
+
+    function handleCellRightClick(r, c) {
+      if (gameState !== 'PLAYING') return;
+      const cell = board[r][c];
+      if (cell.revealed) return;
+
+      cell.flagged = !cell.flagged;
+      const cellEl = gridEl.children[r * BOARD_SIZE + c];
+      cellEl.textContent = cell.flagged ? '👾' : '';
+    }
+
+    function endGame(isWin, message) {
+      gameState = isWin ? 'WIN' : 'GAMEOVER';
+      clearInterval(timerId);
+      statusEl.textContent = message;
+      statusEl.style.color = isWin ? '#00FF66' : '#FFD500';
+
+      if (isWin) {
+        saveHighScore(timeLeft);
+        showModal('🎉 성공 축하합니다!', `남은 시간: ${timeLeft}초`);
+      } else {
+        for (let r = 0; r < BOARD_SIZE; r++) {
+          for (let c = 0; c < BOARD_SIZE; c++) {
+            if (board[r][c].isVirus) {
+              const cellEl = gridEl.children[r * BOARD_SIZE + c];
+              cellEl.classList.add('virus');
+              cellEl.textContent = '👾';
+            }
+          }
+        }
+        if (message === 'TIME OVER!') {
+          showModal('⏱️ TIME OVER!', '30초 제한시간이 초과되었습니다.');
+        } else {
+          showModal('💥 감염되었습니다!', '바이러스 블록을 터뜨렸습니다.');
+        }
+      }
+    }
+
+    function showModal(title, desc) {
+      modalTitleEl.textContent = title;
+      modalDescEl.textContent = desc;
+      modalEl.classList.add('active');
+    }
+
+    function closeModal() {
+      modalEl.classList.remove('active');
+    }
+
+    btnPause.addEventListener('click', () => {
+      if (gameState === 'PLAYING') {
+        gameState = 'PAUSED';
+        statusEl.textContent = 'PAUSED';
+      } else if (gameState === 'PAUSED') {
+        gameState = 'PLAYING';
+        statusEl.textContent = 'PLAYING!';
+      }
+    });
+
+    window.addEventListener('blur', () => {
+      if (gameState === 'PLAYING') {
+        gameState = 'PAUSED';
+        statusEl.textContent = 'PAUSED';
+      }
+    });
+
+    btnStart.addEventListener('click', startGame);
+    btnModalRestart.addEventListener('click', startGame);
+    btnResetData.addEventListener('click', () => {
+      localStorage.removeItem('security_game_best');
+      bestScoreEl.textContent = loadHighScore();
+    });
+
+    bestScoreEl.textContent = loadHighScore();
+    initBoard();
+  </script>
+</body>
+</html>
