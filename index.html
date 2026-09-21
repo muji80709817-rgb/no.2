@@ -275,7 +275,6 @@
       padding-top: 10px;
     }
 
-    /* 팝업 모달 기본 구조 */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -310,7 +309,6 @@
 
     .modal-overlay.active .modal-content { transform: scale(1); }
 
-    /* 팝업 우측 상단 X 닫기 버튼 */
     .modal-close-x {
       position: absolute;
       top: 12px; right: 15px;
@@ -444,7 +442,8 @@
     <div class="dashboard">
       <div>⏱️ <span id="timer">00:00</span></div>
       <div id="game-status" class="status-text">READY!</div>
-      <div>🛡️ 정화: <span id="cleared-count">0</span> / <span id="max-safe-count">0</span></div>
+      <!-- 변경된 부분: 정화 수 대신 남은 바이러스 / 전체 바이러스 수 표시 -->
+      <div>👾 바이러스: <span id="remaining-virus-count">0</span> / <span id="total-virus-count">0</span></div>
     </div>
 
     <div class="controls">
@@ -553,6 +552,7 @@
 
     let board = [];
     let revealedCount = 0;
+    let flaggedCount = 0; // 깃발(👾)을 세운 개수
     let timeLeft = 0;
     let timerId = null;
     let gameState = 'READY';
@@ -564,8 +564,8 @@
     const gridEl = document.getElementById('grid');
     const timerEl = document.getElementById('timer');
     const statusEl = document.getElementById('game-status');
-    const clearedEl = document.getElementById('cleared-count');
-    const maxSafeCountEl = document.getElementById('max-safe-count');
+    const remainingVirusEl = document.getElementById('remaining-virus-count');
+    const totalVirusEl = document.getElementById('total-virus-count');
     const bestScoreEl = document.getElementById('best-score');
     const diffLabelText = document.getElementById('diff-label-text');
     
@@ -644,18 +644,23 @@
       diffLabelText.textContent = preset.name;
       
       gridEl.className = 'grid ' + (preset === PRESETS.EASY ? 'mode-easy' : 'mode-expert');
-      const safeCount = (preset.rows * preset.cols) - preset.virus;
-      maxSafeCountEl.textContent = safeCount;
+      totalVirusEl.textContent = preset.virus;
 
       bestScoreEl.textContent = loadHighScore();
       initBoard();
+    }
+
+    function updateVirusCounter() {
+      const remaining = currentDiff.virus - flaggedCount;
+      remainingVirusEl.textContent = remaining;
     }
 
     function initBoard() {
       gridEl.innerHTML = '';
       board = [];
       revealedCount = 0;
-      clearedEl.textContent = revealedCount;
+      flaggedCount = 0;
+      updateVirusCounter();
       closeModal(resultModal);
 
       const R = currentDiff.rows;
@@ -770,7 +775,6 @@
         endGame(false, 'VIRUS EXPLODE!');
       } else {
         revealCell(r, c);
-        clearedEl.textContent = revealedCount;
         
         if (revealedCount === safeTotal) {
           endGame(true, 'CLEARED! 🎉');
@@ -784,6 +788,13 @@
       if (cell.revealed) return;
 
       cell.flagged = !cell.flagged;
+      if (cell.flagged) {
+        flaggedCount++;
+      } else {
+        flaggedCount--;
+      }
+      updateVirusCounter();
+
       const cellEl = gridEl.children[r * currentDiff.cols + c];
       cellEl.textContent = cell.flagged ? '👾' : '';
     }
@@ -805,14 +816,14 @@
       const cell = board[r][c];
       if (!cell.revealed || cell.count === 0) return;
 
-      let flaggedCount = 0;
+      let currentFlagged = 0;
       let unrevealedNeighbors = [];
 
       for (let dr = -1; dr <= 1; dr++) {
         for (let dc = -1; dc <= 1; dc++) {
           let nr = r + dr, nc = c + dc;
           if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
-            if (board[nr][nc].flagged) flaggedCount++;
+            if (board[nr][nc].flagged) currentFlagged++;
             if (!board[nr][nc].revealed && !board[nr][nc].flagged) {
               unrevealedNeighbors.push({ r: nr, c: nc });
             }
@@ -820,7 +831,7 @@
         }
       }
 
-      if (flaggedCount === cell.count) {
+      if (currentFlagged === cell.count) {
         unrevealedNeighbors.forEach(n => {
           handleCellClick(n.r, n.c);
         });
@@ -867,7 +878,6 @@
       }
     }
 
-    // 모달 관리 이벤트
     btnSelectEasy.addEventListener('click', () => {
       applyDifficulty(PRESETS.EASY);
       closeModal(diffSelectModal);
@@ -950,7 +960,6 @@
       startGame();
     });
 
-    // 메인으로/홈으로 가기 버튼 기능들
     btnResultHome.addEventListener('click', () => {
       closeModal(resultModal);
       goHome();
@@ -992,7 +1001,6 @@
       goHome();
     });
 
-    // 키보드 Esc 키 입력 시 활성화된 모달 닫기
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' || e.key === 'Esc') {
         const activeModals = document.querySelectorAll('.modal-overlay.active');
